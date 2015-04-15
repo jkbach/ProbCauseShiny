@@ -12,7 +12,14 @@ shinyUI(fluidPage(
                 "Upload your own data here", 
                 multiple = FALSE,
                 accept = NULL),
-      downloadButton("downloadData", "Click here to download a csv of the data")
+      h3("Choose your preferences"),
+      checkboxInput("isNumeric", "Already in numeric form", FALSE),
+      checkboxInput("useProbbase", "Use InterVA conditional probability reestimating", FALSE),
+      checkboxInput("keepProbbase", "keepProbbase", FALSE),
+      checkboxInput("datacheck", "Check data consistency", TRUE),
+      actionButton("processMe", "Generate data"), 
+      hr(),
+      downloadButton("downloadData", "Download Summary as .csv")
     ),
     
     mainPanel(
