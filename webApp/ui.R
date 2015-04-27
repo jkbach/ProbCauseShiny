@@ -13,6 +13,8 @@ shinyUI(fluidPage(
                 multiple = FALSE,
                 accept = NULL),
       h3("Choose your preferences"),
+      sliderInput("simLength", "Number of iterations in the simulation"),
+      sliderInput("burnin", "Iterations to discard from the beginning")
       checkboxInput("isNumeric", "Already in numeric form", FALSE),
       checkboxInput("useProbbase", "Use InterVA conditional probability reestimating", FALSE),
       checkboxInput("keepProbbase", "keepProbbase", FALSE),
