@@ -27,9 +27,14 @@ shinyServer(function(input, output) {
     
     #prevents NonElement problems
     if (!is.null(userData)) {
-      fit <- insilico(userData, subpop = NULL, HIV = "h", Malaria = "h", 
-                      length.sim = 400, burnin = 200, thin = 10 , seed = 1,
-                      InterVA.prior = TRUE, external.sep = TRUE, keepProbbase.level = TRUE)
+      burn <- round(input$simLength / 2)
+     fit <- insilico(userData, subpop = NULL, HIV = "h", Malaria = "h", isNumeric = input$isNumeric,
+                     length.sim = input$simLength, burnin = burn, thin = 10 , seed = 1, conv.csmf = 0.02,
+                     InterVA.prior = TRUE, external.sep = TRUE, useProbbase = input$useProbbase,
+                     keepProbbase = input$keepProbbase, datacheck = input$datacheck)
+#      fit<- insilico(userData, subpop = NULL, HIV = "h", Malaria = "h", 
+#                       length.sim = input$simLength, burnin = burn, thin = 10 , seed = 1,
+#                       InterVA.prior = TRUE, external.sep = TRUE, keepProbbase.level = TRUE)
       return (fit)
     }
    })
