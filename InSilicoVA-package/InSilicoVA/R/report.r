@@ -27,6 +27,7 @@ summary.insilico <- function(object, CI.csmf = 0.95, CI.cond = 0.95,
 	ci.low <- (1 - CI.csmf) / 2
 	ci.up <- 1 - ci.low
 	if(class(object$csmf) == "list"){
+		csmf.out <- vector("list", length(csmf))
 		csmf.out.ordered <- vector("list", length(csmf))
 		for(i in 1:length(csmf)){
 			mean <- apply(csmf[[i]], 2, mean)
@@ -34,10 +35,11 @@ summary.insilico <- function(object, CI.csmf = 0.95, CI.cond = 0.95,
 			sd <- apply(csmf[[i]], 2, sd)
 			low <- apply(csmf[[i]], 2, function(object){quantile(object, prob = ci.low)})
 			up <- apply(csmf[[i]], 2, function(object){quantile(object, prob = ci.up)})
-			csmf.out <- cbind(mean, sd,  low, median, up)
-			colnames(csmf.out) <- cbind("Mean","Std.Error", "Lower", "Median", "Upper")
-			csmf.out.ordered[[i]] <- csmf.out[order(csmf.out[,1],
+			csmf.out[[i]]  <- cbind(mean, sd,  low, median, up)
+			colnames(csmf.out[[i]]) <- cbind("Mean","Std.Error", "Lower", "Median", "Upper")
+			csmf.out.ordered[[i]] <- csmf.out[[i]][order(csmf.out[[i]][,1],
 												decreasing = TRUE), ]
+			names(csmf.out)[i] <- names(csmf)[i]
 			names(csmf.out.ordered)[i] <- names(csmf)[i]
 		}
 	}else{

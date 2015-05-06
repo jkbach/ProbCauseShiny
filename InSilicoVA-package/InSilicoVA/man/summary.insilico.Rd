@@ -36,8 +36,8 @@ This function is the summary method for class \code{insilico}.}
 \item{length.sim}{Component of \code{"insilico"} object.}
 \item{thin}{Component of \code{"insilico"} object.}
 \item{burnin}{Component of \code{"insilico"} object.}
-\item{HIV}{Component of \code{"insilico"} object.}
-\item{Malaria}{Component of \code{"insilico"} object.}
+% \item{HIV}{Component of \code{"insilico"} object.}
+% \item{Malaria}{Component of \code{"insilico"} object.}
 \item{jump.scale}{Component of \code{"insilico"} object.}
 \item{levels.prior}{Component of \code{"insilico"} object.}
 \item{levels.strength}{Component of \code{"insilico"} object.}
@@ -63,17 +63,17 @@ Tyler H. McCormick, Zehang R. Li, Clara Calvert, Amelia C. Crampin, Kathleen Kah
 }
 \examples{
 # load sample data together with sub-population list
-data(SampleInput)
+data(SampleInput_insilico)
 # extract INterVA style input data
-data <- SampleInput$data
+data <- SampleInput_insilico$data
 # extract sub-population information. 
 # The groups are "HIV Positive", "HIV Negative" and "HIV status unknown".
-subpop <- SampleInput$subpop
+subpop <- SampleInput_insilico$subpop
 
 # run without subpopulation
-fit1<- insilico( data, subpop = NULL, HIV = "h", Malaria = "h", 
+fit1<- insilico( data, subpop = NULL, 
               length.sim = 400, burnin = 200, thin = 10 , seed = 1,
-              InterVA.prior = TRUE, external.sep = TRUE, keepProbbase.level = TRUE)
+              external.sep = TRUE, keepProbbase.level = TRUE)
 summary(fit1)
 summary(fit1, top = 10)
 }

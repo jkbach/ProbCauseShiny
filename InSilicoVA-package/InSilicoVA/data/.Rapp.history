@@ -2,3 +2,7 @@ load("/Users/bhoule/Dropbox/va/Richard/InterVA4/data/probbase.rda")
 ls
 ls()
 probbase[1:10,]
+load("/Users/zehangli/Bitbucket-repos/InSilicoVA-beta/InSilicoVA/data/SampleInput_insilico.rda")
+ls()
+SampleInput_insilico = SampleInput
+save(SampleInput_insilico, file = "/Users/zehangli/Bitbucket-repos/InSilicoVA-beta/InSilicoVA/data/SampleInput_insilico.rda")

@@ -1,4 +1,4 @@
-insilico <- function(data, isNumeric = FALSE,useProbbase = FALSE, keepProbbase.level = TRUE,  cond.prob.touse = NULL,datacheck = TRUE, warning.write = FALSE, external.sep = TRUE, length.sim = 4000, thin = 10, burnin = 2000, auto.length = TRUE, conv.csmf = 0.02, InterVA.prior = TRUE, csmf.prior = NULL, HIV = NULL, Malaria = NULL, jump.scale = 0.1, levels.prior = NULL, levels.strength = 1, trunc.min = 0.0001, trunc.max = 0.9999, subpop = NULL, java_option = "-Xmx1g", seed = 1){ 
+insilico <- function(data, isNumeric = FALSE,useProbbase = FALSE, keepProbbase.level = TRUE,  cond.prob.touse = NULL,datacheck = TRUE, warning.write = FALSE, external.sep = TRUE, length.sim = 4000, thin = 10, burnin = 2000, auto.length = TRUE, conv.csmf = 0.02, jump.scale = 0.1, levels.prior = NULL, levels.strength = 1, trunc.min = 0.0001, trunc.max = 0.9999, subpop = NULL, java_option = "-Xmx1g", seed = 1){ 
 	
 #############################################################################
 #############################################################################
@@ -495,9 +495,7 @@ ParseResult <- function(N_sub.j, C.j, S.j, N_level.j, pool.j, fit){
 	if(is.null(length.sim) || is.null(thin) || is.null(burnin)){
 		stop("Length of chain/thinning/burn-in not specified")
 	}
-	if(InterVA.prior != 0 && (is.null(HIV) || is.null(Malaria))){
-		stop("No HIV or Malaria status provided")
-	}
+
 ##---------------------------------------------------------------------------------##
 ## initialize key data dependencies
 ##	
@@ -514,9 +512,9 @@ ParseResult <- function(N_sub.j, C.j, S.j, N_level.j, pool.j, fit){
     }
 
     ## check the column names and give warning
-    data("SampleInput", envir = environment())
-    SampleInput <- get("SampleInput", envir  = environment())
-    valabels <- colnames(SampleInput$data)
+    data("SampleInput_insilico", envir = environment())
+    SampleInput_insilico <- get("SampleInput_insilico", envir  = environment())
+    valabels <- colnames(SampleInput_insilico$data)
     vacauses <- causetext[4:63,2]
     external.causes = seq(41, 51)
     external.symps = seq(211, 222)
@@ -686,40 +684,12 @@ ParseResult <- function(N_sub.j, C.j, S.j, N_level.j, pool.j, fit){
 	indic.w.missing <- indic
 ##---------------------------------------------------------------------------------##
 ## parameter initialization
+   # csmf.prior <- rep(1/C, C)
 
-  	# if not using InterVA at all
-  	if(InterVA.prior == FALSE){
-  		if(is.null(csmf.prior)) {
-  			csmf.prior <- rep(1/C, C)
-  		}
-  	# if using InterVA prior
-  	}else if(InterVA.prior == TRUE){
-		Sys_Prior <- as.numeric(change.inter(probbase[1,17:76], order = FALSE))
-		# Number of indicators + 13 description variables. A_group:14-16;B_group:17:76;D_group:77:81
-	    D <- length(Sys_Prior)
-	    ## Modify the prior based on HIV and Malaria prevalence
-	    ## 19 = B_HIVAIDS; 21 = B_MALAR; 39 = B_SICKLE
-	    if(HIV == "h") Sys_Prior[3] <- 0.05
-	    if(HIV == "l") Sys_Prior[3] <- 0.005
-	    if(HIV == "v") Sys_Prior[3] <- 0.00001
-	    if(Malaria == "h"){
-	    	Sys_Prior[5] <- 0.05
-	    	Sys_Prior[23] <- 0.05
-	    }
-	    if(Malaria == "l"){
-	    	Sys_Prior[5] <- 0.005
-	    	Sys_Prior[23] <- 0.00001
-	    }
-	    if(Malaria == "v"){
-	    	Sys_Prior[5] <- 0.00001
-	    	Sys_Prior[23] <- 0.00001
-	    }
-	   csmf.prior <- Sys_Prior/sum(Sys_Prior)
-  	# if using InterVA estimates
-  	}
- 	#  	else if(useInterVA == 2){
-	# 	csmf.prior <- csmf.inter/sum(csmf.inter)
-	# }
+	Sys_Prior <- as.numeric(change.inter(probbase[1,17:76], order = FALSE))
+	# Number of indicators + 13 description variables. A_group:14-16;B_group:17:76;D_group:77:81
+	D <- length(Sys_Prior)
+	csmf.prior <- Sys_Prior/sum(Sys_Prior)
 ##---------------------------------------------------------------------------------##
 ##  initialize prior and adjust for external causes
 	if(method == "dirichlet"){
@@ -745,10 +715,12 @@ ParseResult <- function(N_sub.j, C.j, S.j, N_level.j, pool.j, fit){
 ##---------------------------------------------------------------------------------##
 ## initialize probbase and start java
 	
-
-	cond.prob <- cond.initiate(prob.order, expIni = TRUE, Inter.ini = TRUE,
+	if(!useProbbase){
+		cond.prob <- cond.initiate(prob.order, expIni = TRUE, Inter.ini = TRUE,
 						  min = trunc.min, max = trunc.max)
-    
+    }else{
+    	cond.prob <- prob.orig
+    }
 
     # library(rJava)
 	if(is.null(java_option)) java_option = "-Xmx1g"
@@ -811,13 +783,18 @@ ParseResult <- function(N_sub.j, C.j, S.j, N_level.j, pool.j, fit){
 ##    
     results <- ParseResult(N_sub.j, C.j, S.j, N_level.j, pool.j, fit)
 	# check convergence
-    	if(!is.null(results$csmf.sub)){
-			conv <- csmf.diag(results$csmf.sub, conv.csmf, 
-				              test = "heidel", verbose = FALSE) 	
-    	}else{
-    		conv <- csmf.diag(results$p.hat, conv.csmf, 
-				              test = "heidel", verbose = FALSE) 
-    	}
+    conv <- tryCatch({
+					   if(!is.null(results$csmf.sub)){
+							csmf.diag(results$csmf.sub, conv.csmf, 
+								              test = "heidel", verbose = FALSE) 	
+				    	}else{
+				    		csmf.diag(results$p.hat, conv.csmf, 
+								              test = "heidel", verbose = FALSE) 
+				    	}
+				}, error = function(condition) {
+				    print("error checking diagnostics")
+				    FALSE
+				})
     # check convergence and if the chain needs to run longer
     if(auto.length){	
     	# if not converge, run again, max number of runs = 3
@@ -874,29 +851,47 @@ ParseResult <- function(N_sub.j, C.j, S.j, N_level.j, pool.j, fit){
 ##---------------------------------------------------------------------------------##
 ## To make output consistent for further analysis,
 ## 		add back external results
-
+	##
+	## if separated external causes
+	##
     if(external.sep){
+    	# get starting and ending index
     	ext1 <- external.causes[1]
     	ext2 <- external.causes[2]
+    	##
+    	## if with subgroup
+    	##
     	if(!is.null(subpop)){
+    		# set p.hat to NULL, and set up csmf.sub.all as a list of p.hat 
     		p.hat <- NULL
     		csmf.sub.all <- vector("list", N_sub.j)
     		names(csmf.sub.all) <- unique(subpop)
-    		#array(NA, dim = c(dim(csmf.sub)[1], 60, dim(csmf.sub)[3]))
+    		# iterate over all subpopulation
     		for(j in 1:length(csmf.sub)){
-    			csmf.sub.all[[j]] <- matrix(0, dim(csmf.sub[[j]])[1], C.j + length(external.causes))
-    			temp <- csmf.sub[[j]] * length(sublist[[j]])/(length(sublist[[j]]) + length(which(externals$ext.sub == unique(sublist)[j])))
-    			temp <- cbind(temp[, 1:(ext1 - 1)], 
-    						  matrix(externals$ext.csmf[[j]], 
-    						  	     dim(temp)[1],length(external.causes)), 
-    						  temp[, ext1:C.j])
-    			csmf.sub.all[[j]] <- temp
+    			# initialize the csmf matrix 
+    			csmf.sub.all[[j]] <- matrix(0, 
+    				dim(csmf.sub[[j]])[1], 
+    				C.j + length(external.causes))
+    			# rescale the non-external CSMF once the external causes are added 
+    			rescale <- length(sublist[[j]]) / (length(sublist[[j]]) + length(which(externals$ext.sub == unique(subpop)[j])))
+    			temp <- csmf.sub[[j]] * rescale
+    					
+    			# combine the rescaled non-external CSMF with the external CSMF	
+    			csmf.sub.all[[j]]  <- cbind(temp[, 1:(ext1 - 1)], 
+				    						matrix(externals$ext.csmf[[j]], 
+				    						  	   dim(temp)[1],
+				    						  	   length(external.causes), 
+				    						  	   byrow = TRUE), 
+				    						temp[, ext1:C.j])	
     		}
     		csmf.sub <- csmf.sub.all
+    	##
+    	## if no subgroup
+    	##
     	}else{
     		p.hat <- p.hat * N/(N + length(externals$ext.id))
     		temp <- p.hat[, ext1:C.j]
-    		extra <- matrix(externals$ext.csmf, dim(p.hat)[1], length(external.causes))
+    		extra <- matrix(externals$ext.csmf, dim(p.hat)[1], length(external.causes), byrow = TRUE)
     		p.hat <- cbind(p.hat[, 1:(ext1 - 1)], extra, temp)
     	}
 
@@ -954,8 +949,7 @@ out <- list(
 		length.sim = length.sim, 
 		thin = thin, 
 		burnin = burnin, 
-		HIV = HIV, 
-		Malaria = Malaria, 
+	
 		jump.scale = jump.scale, 
 		levels.prior = levels.prior, 
 		levels.strength = levels.strength, 

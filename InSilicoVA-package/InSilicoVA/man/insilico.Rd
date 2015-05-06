@@ -15,8 +15,7 @@ For Windows user, this function will produce a popup window showing the progress
   insilico(data, isNumeric = FALSE,useProbbase = FALSE, keepProbbase.level = TRUE,  
            cond.prob.touse = NULL, datacheck = TRUE, warning.write = FALSE, 
            external.sep = TRUE, length.sim = 4000, thin = 10, burnin = 2000, 
-           auto.length = TRUE, conv.csmf = 0.02, InterVA.prior = TRUE, 
-           csmf.prior = NULL, HIV = NULL, Malaria = NULL, jump.scale = 0.1, 
+           auto.length = TRUE, conv.csmf = 0.02, jump.scale = 0.1, 
            levels.prior = NULL, levels.strength = 1, trunc.min = 0.0001, 
            trunc.max = 0.9999, subpop = NULL, java_option = "-Xmx1g", seed = 1)
 }
@@ -25,9 +24,9 @@ For Windows user, this function will produce a popup window showing the progress
 
   \item{isNumeric}{Indicator if the input is already in numeric form. If the input is coded numerically such that 1 for ``present'', 0 for ``absent'', and -1 for ``missing'', this indicator could be set to True to avoid conversion to standard InterVA format.}
 
-  \item{useProbbase}{Logical indicator. If TRUE, then use InterVA conditional probability table re-estimating.}
+  \item{useProbbase}{Logical indicator. If TRUE, then use InterVA conditional probability table without re-estimating.}
 
-  \item{keepProbbase.level}{Logical indicator when \code{useProbbase} is FALSE. If TRUE, then only estimate the InterVA's conditional probability table interpretation table; if FALSE, estimate the whole conditional probability matrix. Default to FALSE.}
+  \item{keepProbbase.level}{Logical indicator when \code{useProbbase} is FALSE. If TRUE, then only estimate the InterVA's conditional probability table interpretation table; if FALSE, estimate the whole conditional probability matrix. Default to TRUE.}
 
   \item{cond.prob.touse}{Customized conditional probability table to use. Currently only accepting the same configuration as InterVA-4 software. It should be a matrix of 245 rows of symptoms and 60 columns of causes, arranged in the same order as in InterVA-4 specification. The elements in the matrix should be the conditional probability of corresponding symptom given the corresponding cause, represented in alphabetic form indicating levels. For example input, see \code{\link{condprob}}}
 
@@ -51,16 +50,15 @@ For Windows user, this function will produce a popup window showing the progress
 %   \item{alpha.scale}{
 % Parameter for Dirichlet model. \eqn{\alpha} value used in Dirichlet prior. Larger \eqn{\alpha} gives less volatile CSMF.
 % }
-
-  \item{InterVA.prior}{ Logical indicator of whether to use InterVA prior as prior on CSMF. Default to be TRUE.
-  }
-   \item{csmf.prior}{ If \code{UseInterVA} is set to 0, this allows a user defined distribution of CSMF to be used. If it is not provided, the algorithm will start from uniform distribution across all causes.
-}
+%   \item{InterVA.prior}{ Logical indicator of whether to use InterVA prior as prior on CSMF. Default to be TRUE.
+%   }
+%    \item{csmf.prior}{ If \code{UseInterVA} is set to 0, this allows a user defined distribution of CSMF to be used. If it is not provided, the algorithm will start from uniform distribution across all causes.
+% }
  
-  \item{HIV}{ The HIV level used when \code{UseHIV} is set to 1 or 2.
-}
-  \item{Malaria}{ The Malaria level used when \code{UseHIV} is set to 1 or 2.
-}
+%   \item{HIV}{ The HIV level used when \code{UseHIV} is set to 1 or 2.
+% }
+%   \item{Malaria}{ The Malaria level used when \code{UseHIV} is set to 1 or 2.
+% }
   \item{jump.scale}{ The scale of Metropolis proposal in the Normal model. Default to be 0.1.
 }
 
@@ -121,21 +119,21 @@ Tyler H. McCormick, Zehang R. Li, Clara Calvert, Amelia C. Crampin, Kathleen Kah
 }
 \examples{
 # load sample data together with sub-population list
-data(SampleInput)
-# extract INterVA style input data
-data <- SampleInput$data
+data(SampleInput_insilico)
+# extract InterVA style input data
+data <- SampleInput_insilico$data
 # extract sub-population information. 
 # The groups are "HIV Positive", "HIV Negative" and "HIV status unknown".
-subpop <- SampleInput$subpop
+subpop <- SampleInput_insilico$subpop
 
 # run without subpopulation
-fit1<- insilico( data, subpop = NULL, HIV = "h", Malaria = "h", 
+fit1<- insilico( data, subpop = NULL,  
               length.sim = 400, burnin = 200, thin = 10 , seed = 1,
-              InterVA.prior = TRUE, external.sep = TRUE, keepProbbase.level = TRUE)
+              external.sep = TRUE, keepProbbase.level = TRUE)
 
 # re-run with subpopulation
-fit2<- insilico( data, subpop = subpop, HIV = "h", Malaria = "h", 
+fit2<- insilico( data, subpop = subpop, 
               length.sim = 400, burnin = 200, thin = 10 , seed = 1,
-              InterVA.prior = TRUE, external.sep = TRUE, keepProbbase.level = TRUE)
+              external.sep = TRUE, keepProbbase.level = TRUE)
 
 }

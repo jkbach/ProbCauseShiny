@@ -6,16 +6,18 @@
 Produce a bar plot of the CSMFs for a fitted \code{"insilico"} object.
 }
 \usage{
-\method{plot}{insilico}(x, type = c("bar", "compare")[1], top = 10, causelist = NULL, 
-  which.sub = NULL, xlab = "Causes", ylab = "CSMF", title = "Top CSMF Distribution", 
-	horiz = TRUE, angle = 60, fill = "lightblue", border = "black", bw = FALSE,
-	...)
+\method{plot}{insilico}(x, type = c("errorbar", "bar", "compare")[1], 
+  top = 10, causelist = NULL, which.sub = NULL, 
+  xlab = "Causes", ylab = "CSMF", title = "Top CSMF Distribution", 
+  horiz = TRUE, angle = 60, fill = "lightblue", 
+  err_width = .4, err_size = .6, point_size = 2, 
+  border = "black", bw = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 fitted \code{"insilico"} object}
-  \item{type}{An indicator of the type of chart to plot. "bar" for bar chart on single population; "compare" for bar charts on multiple sub-populations.}
+  \item{type}{An indicator of the type of chart to plot. "errorbar" for line plots of only the error bars on single population; "bar" for bar chart with error bars on single population; "compare" for line charts on multiple sub-populations.}
   \item{top}{The number of top causes to plot. If multiple sub-populations are to be plotted, it will plot the union of the top causes in all sub-populations.}
   \item{causelist}{The list of causes to plot. It could be a numeric vector indicating the position of the causes in the InterVA cause list (see \code{\link{causetext}}), or a vector of character string of the cause names. The argument supports partial matching of the cause names. e.g., "HIV/AIDS related death" could be abbreviated into "HIV"; "Other and unspecified infect dis" could be abbreviated into "Other and unspecified infect".}
   \item{which.sub}{Specification of which sub-population to plot if there are multiple and \code{type} is set to "bar".}
@@ -26,6 +28,9 @@ fitted \code{"insilico"} object}
   \item{angle}{Angle of rotation for the texts on x axis when \code{horiz} is set to FALSE}
   \item{fill}{The color to fill the bars when \code{type} is set to "bar". }
   \item{border}{The color to color the borders of bars when \code{type} is set to "bar".}
+  \item{err_width}{Size of the error bars.}
+  \item{err_size}{Thickness of the error bar lines.}
+  \item{point_size}{Size of the points.}
   \item{bw}{Logical indicator for setting the theme of the plots to be black and white.}
   \item{\dots}{Not used.}
 }
@@ -53,27 +58,34 @@ Tyler H. McCormick, Zehang R. Li, Clara Calvert, Amelia C. Crampin, Kathleen Kah
 }
 \examples{
 # load sample data together with sub-population list
-data(SampleInput)
+data(SampleInput_insilico)
 # extract INterVA style input data
-data <- SampleInput$data
+data <- SampleInput_insilico$data
 # extract sub-population information. 
 # The groups are "HIV Positive", "HIV Negative" and "HIV status unknown".
-subpop <- SampleInput$subpop
+subpop <- SampleInput_insilico$subpop
 
 # run without sub-population
-fit1<- insilico( data, subpop = NULL, HIV = "h", Malaria = "h", 
+fit1<- insilico( data, subpop = NULL, 
               length.sim = 400, burnin = 200, thin = 10 , seed = 1,
-              InterVA.prior = TRUE, external.sep = TRUE, keepProbbase.level = TRUE)
+              external.sep = TRUE, keepProbbase.level = TRUE)
 # default plot
 plot(fit1)
-# customized plot
+
+# customized line plot
 plot(fit1, top = 15, horiz = FALSE, fill = "gold", 
-		   bw = TRUE, title = "Top 15 CSMFs", angle = 70)
+		   bw = TRUE, title = "Top 15 CSMFs", angle = 70, 
+       err_width = .2, err_size = .6, point_size = 2)
+
+# customized bar plot
+plot(fit1, type = "bar", top = 15, horiz = TRUE, 
+       bw = TRUE, title = "Top 15 CSMFs", angle = 70, 
+       err_width = .5, err_size = .6)
 
 # run with sub-populations
-fit2<- insilico( data, subpop = subpop, HIV = "h", Malaria = "h", 
+fit2<- insilico( data, subpop = subpop, 
               length.sim = 400, burnin = 200, thin = 10 , seed = 1,
-              InterVA.prior = TRUE, external.sep = TRUE, keepProbbase.level = TRUE)
+              external.sep = TRUE, keepProbbase.level = TRUE)
 # default plot
 plot(fit2, type = "compare", top = 5, title = "Top 5 causes comparison")
 # customized single sub-population plot
