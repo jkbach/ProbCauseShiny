@@ -17,49 +17,47 @@ shinyServer(function(input, output) {
     
     #load the data so it can be manipulated, save to variable
     curr <- read.csv(userData$datapath)
-    return (curr)
+    
   })
   
-  #Runs "a" insilico command on the data.  Note that this is the default
-  #and options will need to be added.
+  #Runs insilico method on the data.
   getFit <- reactive({
+    #get user's data
     userData <- toAnalyze()
     
+    #get the optional, user-provided cond prob
+    userBase <- isolate(input$customProbbase)
+    if (is.null(userBase) | isolate(input$defaultCondProb)) {
+      userBase = NULL
+    } else {
+      userBase = read.csv(userBase$datapath)
+    }
+        
     #prevents NonElement problems
     if (!is.null(userData)) {
-      burn <- round(input$simLength / 2)
-     fit <- insilico(userData, subpop = NULL, HIV = "h", Malaria = "h", isNumeric = input$isNumeric,
-                     length.sim = input$simLength, burnin = burn, thin = 10 , seed = 1, conv.csmf = 0.02,
-                     InterVA.prior = TRUE, external.sep = TRUE, useProbbase = input$useProbbase,
-                     keepProbbase = input$keepProbbase, datacheck = input$datacheck)
-#      fit<- insilico(userData, subpop = NULL, HIV = "h", Malaria = "h", 
-#                       length.sim = input$simLength, burnin = burn, thin = 10 , seed = 1,
-#                       InterVA.prior = TRUE, external.sep = TRUE, keepProbbase.level = TRUE)
-      return (fit)
-    }
-   })
-  
-  
-  #Creates a summary of the data
-  getSum <- reactive({
-    getFit <- getFit()
-    if (!is.null(getFit)) {  
-      print(summary(getFit))
+      burn <- round(isolate(input$simLength) / 2)
+      fit <- insilico(userData, subpop = NULL, isNumeric = isolate(input$isNumeric), 
+                      length.sim = isolate(input$simLength), burnin = burn, thin = 10,
+                      conv.csmf = 0.02, external.sep = isolate(input$externalSep),
+                      keepProbbase.level = isolate(input$keepProbbase), cond.prob.touse = userBase,
+                      datacheck = isolate(input$datacheck), seed = isolate(input$seed))
     }
   })
   
+  
+  #allows user to download a summary csv
   output$downloadData <- downloadHandler(
-      filename = "InSilicoVASummary.csv",
-      content = function(file) {
-        if (!is.null(getFit())){
-          summary(getFit(), file = file)
-        }
+    filename = "InSilicoVASummary.csv",
+    content = function(file) {
+      if (!is.null(getFit())){
+        summary.insilico(getFit(), file = file)
       }
+    }
   )
+
   output$mainPlot <- renderPlot({
-    fit <- getFit()
-    if (!is.null(fit)) {
-      plot(fit);
+    if (!is.null(getFit())) {
+      plot(getFit());
     }
   })
 })
