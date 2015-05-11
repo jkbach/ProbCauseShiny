@@ -39,6 +39,7 @@ shinyServer(function(input, output) {
       fit <- insilico(userData, subpop = NULL, isNumeric = isolate(input$isNumeric), 
                       length.sim = isolate(input$simLength), burnin = burn, thin = 10,
                       conv.csmf = 0.02, external.sep = isolate(input$externalSep),
+                      useProbbase = isolate(input$useProbbase),
                       keepProbbase.level = isolate(input$keepProbbase), cond.prob.touse = userBase,
                       datacheck = isolate(input$datacheck), seed = isolate(input$seed))
     }
