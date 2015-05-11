@@ -1,4 +1,7 @@
 library(shiny)
+install.packages("rJava")
+library("rJava")
+
 library(InSilicoVA)
 
 shinyServer(function(input, output) {
