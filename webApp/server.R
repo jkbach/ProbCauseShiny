@@ -1,5 +1,7 @@
 library(shiny)
 library(InSilicoVA)
+# change maximum upload size
+options(shiny.maxRequestSize=30*1024^2)
 
 shinyServer(function(input, output) {
   
