@@ -26,11 +26,11 @@ shinyUI(fluidPage(
       checkboxInput("autoLength", "Automatically increase iterations if needed?", FALSE),
       checkboxInput("isNumeric", "Data already in numeric form?", FALSE),
       checkboxInput("useProbbase", "Use InterVA conditional probability without reestimating?", FALSE), #NOT WORKING
-      checkboxInput("keepProbbase", "Keep Probbase inconsistincies (ensures compatibility with InterVA)?", TRUE),
+      checkboxInput("keepProbbase", "Estimating Probbase levels only", TRUE),
       checkboxInput("datacheck", "Check data consistency?", TRUE),
       checkboxInput("externalSep", "Separate out external clauses (suggested)?", TRUE),
       numericInput("seed", "Select Seed Value", 1, min = "1"),
-      h6("(Please note this connection his not encrypted.  Do not upload data that 
+      h6("(Please note this connection is not encrypted.  Do not upload data that 
           require a secure connection.)"),
       actionButton("processMe", "Analyze my data!"),
       hr(),
