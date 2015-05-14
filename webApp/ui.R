@@ -23,8 +23,9 @@ shinyUI(fluidPage(
       h3("Choose your preferences"),
       br(),
       sliderInput("simLength", "Number of iterations in the simulation", min=300, max=7000, value=4000),
+      checkboxInput("autoLength", "Automatically increase iterations if needed?", FALSE),
       checkboxInput("isNumeric", "Data already in numeric form?", FALSE),
-      checkboxInput("useProbbase", "Use without InterVA conditional probability reestimating?", TRUE), #NOT WORKING
+      checkboxInput("useProbbase", "Use InterVA conditional probability without reestimating?", FALSE), #NOT WORKING
       checkboxInput("keepProbbase", "Keep Probbase inconsistincies (ensures compatibility with InterVA)?", TRUE),
       checkboxInput("datacheck", "Check data consistency?", TRUE),
       checkboxInput("externalSep", "Separate out external clauses (suggested)?", TRUE),
