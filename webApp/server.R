@@ -1,5 +1,7 @@
 library(shiny)
 library(InSilicoVA)
+library(InterVA4)
+
 # change maximum upload size
 options(shiny.maxRequestSize=30*1024^2)
 
@@ -23,7 +25,7 @@ shinyServer(function(input, output) {
   })
   
   #Runs insilico method on the data.
-  getFit <- reactive({
+  getFit <- reactive({ 
     #get user's data
     userData <- toAnalyze()
     
@@ -58,9 +60,25 @@ shinyServer(function(input, output) {
     }
   )
 
+  #renders the output for InterVA 
+  output$InterVAPlot <- renderPlot({
+    input$InterVAProcess
+    print("here we are")
+    userData <- isolate(input$readIn)
+    
+    if (is.null(userData))
+      return (NULL)
+    print("got the data")
+    curr <- read.csv(userData$datapath)
+    
+    temp <- InterVA(curr, HIV = "h", Malaria = "v")
+    Population.summary(temp$VA, type = "bar", main = "InterVA plot")
+  })
+  
+  #renders the plot for InSilicoVA
   output$mainPlot <- renderPlot({
     if (!is.null(getFit())) {
-      plot(getFit());
+      plot(getFit(), title = "Top CSMF Distribution using InSilicoVA");
     }
   })
 })

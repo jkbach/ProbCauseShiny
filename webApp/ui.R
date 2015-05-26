@@ -1,5 +1,6 @@
 library(shiny)
 library(InSilicoVA)
+library(InterVA4)
 
 shinyUI(fluidPage(
   
@@ -12,7 +13,7 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       fileInput("readIn", 
-                "Upload your own data here", 
+                "Upload your own data here",
                 multiple = FALSE,
                 accept = NULL),
       fileInput("customProbbase", 
@@ -34,12 +35,14 @@ shinyUI(fluidPage(
       h6("(Please note this connection is not encrypted.  Do not upload data that 
           require a secure connection.)"),
       actionButton("processMe", "Analyze my data!"),
+      actionButton("InterVAProcess", "See InterVA alalysis"),
       hr(),
       downloadButton("downloadData", "Download Summary as .csv")
     ),
     
     mainPanel(
-      plotOutput("mainPlot")
+      plotOutput("mainPlot"),
+      plotOutput("InterVAPlot")
     )
   ),
   p("Webpage created by John Kaltenbach ", a(href="mailto:jkbach@uw.edu", "(jkbach@uw.edu)"))
