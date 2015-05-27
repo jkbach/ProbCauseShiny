@@ -1,7 +1,8 @@
 library(shiny)
 library(InSilicoVA)
 library(InterVA4)
-
+source("InterVA-fit-override.R")
+source("InterVA-plot-override.R")
 # change maximum upload size
 options(shiny.maxRequestSize=30*1024^2)
 
@@ -71,7 +72,7 @@ shinyServer(function(input, output) {
     print("got the data")
     curr <- read.csv(userData$datapath)
     
-    temp <- InterVA(curr, HIV = "h", Malaria = "v")
+    temp <- InterVA(curr, HIV = "h", Malaria = "v", write = FALSE)
     Population.summary(temp$VA, type = "bar", main = "InterVA plot")
   })
   
